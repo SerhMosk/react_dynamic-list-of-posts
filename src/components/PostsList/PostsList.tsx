@@ -1,37 +1,65 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './PostsList.scss';
+import { Post } from '../../react-app-env';
+import { getUserPosts, getAllPosts } from '../../api/posts';
 
-export const PostsList: React.FC = () => (
-  <div className="PostsList">
-    <h2>Posts:</h2>
+interface Props {
+  userId: string;
+  postId: number | undefined;
+  selectPost: (arg?: number) => void;
+}
 
-    <ul className="PostsList__list">
-      <li className="PostsList__item">
-        <div>
-          <b>[User #1]: </b>
-          sunt aut facere repellat provident occaecati excepturi optio
-        </div>
-        <button
-          type="button"
-          className="PostsList__button button"
-        >
-          Close
-        </button>
-      </li>
+export const PostsList: React.FC<Props> = ({
+  userId,
+  postId,
+  selectPost,
+}) => {
+  const [posts, setPosts] = useState<Post[]>([]);
 
-      <li className="PostsList__item">
-        <div>
-          <b>[User #2]: </b>
-          et ea vero quia laudantium autem
-        </div>
+  useEffect(() => {
+    getAllPosts().then(res => setPosts(res));
+  }, []);
 
-        <button
-          type="button"
-          className="PostsList__button button"
-        >
-          Open
-        </button>
-      </li>
-    </ul>
-  </div>
-);
+  useEffect(() => {
+    if (userId === '0') {
+      getAllPosts().then(res => setPosts(res));
+    } else {
+      getUserPosts(userId).then(res => setPosts(res));
+    }
+  }, [userId]);
+
+  return (
+    <div className="PostsList">
+      <h2>Posts:</h2>
+
+      <ul className="PostsList__list" data-cy="postDetails">
+        {posts.map(post => (
+          <li className="PostsList__item" key={post.id}>
+            <div>
+              <b>
+                [User #
+                { post.userId }
+                ]:
+              </b>
+              &nbsp;
+              { post.body }
+            </div>
+            <button
+              type="button"
+              className="PostsList__button button"
+              onClick={() => {
+                if ((postId) && (postId === post.id)) {
+                  selectPost(undefined);
+                } else {
+                  selectPost(post.id);
+                }
+              }}
+            >
+              {postId && (postId === post.id) ? 'Close' : 'Open'}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
