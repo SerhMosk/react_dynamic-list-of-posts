@@ -4,11 +4,17 @@
   }
 
   &__comments {
+    margin-bottom: 10px;
     text-align: right;
   }
 
   &__list {
     list-style: none;
+    margin: 0;
+
+    &.hide {
+      display: none;
+    }
   }
 
   &__list-item {
